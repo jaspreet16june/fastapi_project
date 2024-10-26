@@ -16,3 +16,12 @@ Make virtual enviornment by using virtualenv new_env
 Activate the enviornment always while working on this project 
 
 command: uvicorn main:app --reload
+
+
+├── main.py                  # FastAPI app entry point
+├── models.py                # SQLAlchemy models
+├── schemas.py               # Pydantic models for request/response
+├── database.py              # Database connection and setup
+├── auth.py                  # Authentication & JWT handling
+├── file_operations.py       # File upload/download logic
+└── utils.py                 # Utility functions (encryption, validation)
