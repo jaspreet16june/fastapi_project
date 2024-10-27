@@ -8,12 +8,20 @@ class UserRole(str, Enum):
     CLIENT_USER = "client_user"
     
     
+# class UserRole(Base):
+#     __tablename__ = 'user role'
+#     id = Column(Integer, primary_key=True, index=True)
+#     name = Column(String)
+#     is_active = Column(Boolean, default=True)
+    
+    
 class User(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
     role = Column(SQLalchemyEnum(UserRole), nullable=False)
+    is_verified = Column(Boolean, default=False)
     is_active = Column(Boolean, default=True)
     
     

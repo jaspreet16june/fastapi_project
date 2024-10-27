@@ -1,8 +1,10 @@
 import bcrypt
-import jwt
 from datetime import datetime, timedelta
+import jwt
+import secrets
 
-secret_key = "" 
+# Generate a secure random SECRET_KEY
+SECRET_KEY = 'b06175dc14e188825ace71e5abfa0747c9acd02dd3a41cfca5e1991145877f4f'
 ALGORITHM = "HS256"
 
 def hash_password(password: str) -> str:
@@ -17,6 +19,10 @@ def hash_password(password: str) -> str:
 def create_verification_token(email: str):
     expire = datetime.now() + timedelta(hours=1) #This token is valid for only 1 hour 
     encoding = {"sub": email, "exp": expire}
-    return jwt.encode(encoding, secret_key, algorithm=ALGORITHM)
+    return jwt.encode(encoding, SECRET_KEY, algorithm=ALGORITHM)
 
-# create secert key 
+
+def decode_jwt(token: str) -> dict:
+    reset_token_data = jwt.decode(token, algorithms=ALGORITHM, key=SECRET_KEY)
+
+    return reset_token_data
