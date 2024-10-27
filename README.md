@@ -25,3 +25,6 @@ command: uvicorn main:app --reload
 ├── auth.py                  # Authentication & JWT handling
 ├── file_operations.py       # File upload/download logic
 └── utils.py                 # Utility functions (encryption, validation)
+
+
+pip install fastapi-mail
