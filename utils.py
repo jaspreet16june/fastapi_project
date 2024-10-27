@@ -1,7 +1,10 @@
 from email.message import EmailMessage
 import smtplib
 import os
-from email.message import EmailMessage
+import base64
+from urllib.parse import urlencode
+
+from fastapi import UploadFile
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -22,3 +25,10 @@ def send_verification_email(email: str, verification_url: str):
         smtp.send_message(msg)
         
     return "Mail sent successfully!"
+
+def generate_encrypted_url(filename: str) -> str:
+    # Basic encoding of the filename for the URL
+    encoded_filename = base64.urlsafe_b64encode(filename.encode()).decode()
+    download_url = f"tmp/path/to/your/files/{encoded_filename}"
+    
+    return download_url

@@ -1,11 +1,15 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+import bcrypt
+import os
+from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File
 
-from pydantic_schema import UserSchema
+from pydantic_schema import LoginUserSchema, UserSchema
 from password import create_verification_token, decode_jwt, hash_password
 from database import SessionLocal
 from sqlalchemy.orm import Session
-from models import User
+from models import Files, User, UserRole
 from utils import send_verification_email
+from utils import generate_encrypted_url  
+from fastapi.responses import FileResponse
 
 
 
@@ -71,3 +75,100 @@ async def verify(token: str, db: Session = Depends(get_db)):
     return "Token Verify successfully!"
     
     
+    
+@app.post('/login')
+def login_user(user: LoginUserSchema, db: Session = Depends(get_db)):
+    user_data = user
+    if not user_data.email:
+        return f"User email is mandatory field. Please provide me that."
+    
+    user_exists = db.query(User).filter(User.email == user.email, User.is_verified == True).first()
+    
+    if not user_exists:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Email id doesn't exists! Please enter correct email.")
+        
+    encoded_passcode = user_data.password.encode('utf-8')
+    user_data.password.encode('utf-8')
+    if user_exists and bcrypt.checkpw(encoded_passcode, user_exists.hashed_password.encode('utf-8')):
+        return HTTPException(status_code=status.HTTP_200_OK, detail="User is successfully logged in!")
+    
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password is incorrect. Kindly enter the correct password.")
+    
+
+
+@app.post("/upload-file")
+async def upload_file(email:str, file: UploadFile = File(...), db: Session = Depends(get_db)):
+    
+    # Check if the current user is an Ops User
+    current_user = db.query(User).filter(User.email == email).first()
+    if current_user.role == UserRole.CLIENT_USER:
+        raise HTTPException(status_code=403, detail="You are not authorized to upload files.")
+
+    # Validate file type
+    if file.content_type not in [
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",  # docx
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",       # xlsx
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation"  # pptx
+    ]:
+        raise HTTPException(status_code=400, detail="Only pptx, docx, and xlsx files are allowed.")
+
+    UPLOAD_DIRECTORY = "/tmp/path/to/your/files/"
+    if not os.path.exists(UPLOAD_DIRECTORY):
+        os.makedirs(UPLOAD_DIRECTORY)
+    
+    file_location = f"{UPLOAD_DIRECTORY}{file.filename}"
+    
+    with open(file_location, "wb+") as file_object:
+        file_object.write(await file.read())
+
+    # Generate an encrypted URL for the uploaded file
+    encrypted_url = generate_encrypted_url(file.filename)
+
+    # Save the encrypted URL in the database
+    # Assuming you have a File model to save the details
+    new_file_entry = Files(
+        file_name=file.filename,
+        encrypted_url=encrypted_url,
+        user_id=current_user.id  
+    )
+    db.add(new_file_entry)
+    db.commit()
+    db.refresh(new_file_entry)
+
+    return {"detail": "File uploaded successfully!", "encrypted_url": encrypted_url}
+
+@app.get("/download-file/{file_id}")
+async def download_file(email: str, file_id: int, db: Session = Depends(get_db)):
+    
+    file_entry = db.query(Files).filter(Files.id == file_id).first()
+
+    if not file_entry:
+        raise HTTPException(status_code=404, detail="File not found.")
+    
+    current_user = db.query(User).filter(User.email == email).first()
+    if current_user.role == UserRole.OPS_USER:
+        raise HTTPException(status_code=403, detail="You are not authorized to download files.")
+
+
+    file_path = os.path.join("/tmp/path/to/your/files/", file_entry.file_name)
+    
+    if not os.path.isfile(file_path):
+        raise HTTPException(status_code=404, detail="File not found.")
+    
+    return {"encrypted_url": file_entry.encrypted_url}  # Return the encrypted URL for the file
+    # return FileResponse(file_path, media_type='application/octet-stream', filename=file_entry.file_name)
+
+
+@app.get("/list-files")
+async def list_files(email: str, db: Session = Depends(get_db)):
+    
+    current_user = db.query(User).filter(User.email == email).first()
+    if current_user.role == UserRole.OPS_USER:
+        raise HTTPException(status_code=403, detail="You are not authorized to view files.")
+
+    # Query the database for all files
+    files = db.query(Files).all()
+    
+    return files 

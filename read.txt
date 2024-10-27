@@ -1,0 +1,4 @@
+git rm -rf --cached __pycache__/
+
+for ignoring files  using .gitignore 
+use this command for ignoring the file 

@@ -1,7 +1,6 @@
 import bcrypt
 from datetime import datetime, timedelta
 import jwt
-import secrets
 
 # Generate a secure random SECRET_KEY
 SECRET_KEY = 'b06175dc14e188825ace71e5abfa0747c9acd02dd3a41cfca5e1991145877f4f'
