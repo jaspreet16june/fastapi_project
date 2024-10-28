@@ -1,30 +1,33 @@
-Fast API: Python Framework
-How to Setup database.py file (means How to setup database)
-1) Install postgres.
-2) Then access to postgres SQL
-    Sudo -u postgres psql
-3) CREATE USER new_user WITH PASSWORD 'Test@123'; 
-4) Create database file shaving-bd database name Owner (username>,
-5) GRANT all prèvilges on Database <DB-name > to <username>,
-6) Make DATABASE_URL:
-   postgresql:// <username>: Password (@localhost: 5432 (Database name>
-7) Base declartive-base()
-8) session Local = Sessionmaker (bind= engine)
+FILE SHARING SYSTEM BETWEEN OPS USER AND CLIENT USER
 
-Intsall : fastapi, psycopg2-binary, SQLAlchemy, alembic, pydantic
-Make virtual enviornment by using virtualenv new_env
-Activate the enviornment always while working on this project 
+Framework: FastAPI
+Language: Python 
+Database: Postgresql
 
-command: uvicorn main:app --reload
+This project aims to provide a robust and secure environment for file sharing between two distinct user roles while ensuring ease of use and strict adherence to security protocols.
+
+-> Set up of project:
+1. Create virtual enviornment , Activate the env and install the requirements
+2. Hit command pip intsall -r requirement.txt for installing all the required dependencies 
+3. Set Up Alembic for Database Migrations: Configure Alembic to manage and apply database migrations.
+4. Set Up the PostgreSQL Database:
+    Install PostgreSQL if it's not already installed.
+    Verify the installation by running:
+    "sudo -u postgres psql" to check that psql is installed correctly 
+    After that create user in postgres and set up the password for the same.
+    Grant all privilges to the created user.
+
+5.  For running the server : command: uvicorn main:app --reload
 
 
 ├── main.py                  # FastAPI app entry point
 ├── models.py                # SQLAlchemy models
-├── schemas.py               # Pydantic models for request/response
+├── pydantic_schema.py               # Pydantic models for request/response
 ├── database.py              # Database connection and setup
-├── auth.py                  # Authentication & JWT handling
-├── file_operations.py       # File upload/download logic
+├── auth_utils.py                  # Authentication & JWT handling
+├── api ──|
+|         |── file_system.py  # File upload/download logic
+|         |── login.py         # User login logic
+|         |── signup.py         # User signup logic
 └── utils.py                 # Utility functions (encryption, validation)
 
-
-pip install fastapi-mail

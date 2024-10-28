@@ -35,7 +35,7 @@ def create_verification_token(email: str):
         str: A JWT token as a string.
     """
     # By default the token expiration time is 1 hour but this is dynamically configured so it can be increase.
-    expire = datetime.now() + timedelta(hours=os.getenv("TOKEN_EXPIRATION_TIME", 1)) 
+    expire = datetime.now() + timedelta(hours=int(os.getenv("TOKEN_EXPIRATION_TIME", 1))) 
     encoding = {"sub": email, "exp": expire}
     return jwt.encode(encoding, SECRET_KEY, algorithm=ALGORITHM)
 
