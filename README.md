@@ -19,6 +19,15 @@ This project aims to provide a robust and secure environment for file sharing be
 
 5.  For running the server : command: uvicorn main:app --reload
 
+6. Also create .env for authentication configurations 
+    DB_USER=user_name
+    DB_PASS=Test
+    DB_HOST=localhost
+    DB_PORT=5432
+    DB_NAME=fastapi_db
+    SENDER_USER_EMAIL=test@gmail.com
+    TOKEN_EXPIRATION_TIME=1
+    SECRET_KEY=b06175dc14e188825ace71e5abfa0747c9acd02dd3a41cfca5e1991145877f4f
 
 ├── main.py                  # FastAPI app entry point
 ├── models.py                # SQLAlchemy models
